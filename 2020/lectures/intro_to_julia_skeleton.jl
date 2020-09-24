@@ -312,9 +312,7 @@ md"*type declarations in functions*
 
 # ╔═╡ 0e0a8cba-fd31-11ea-26ed-2d27f95f54ff
 md"### control flow
-> a control flow statement is a statement, the execution of which results in a choice being made as to which of two or more paths a computer program wil follow - [Wikipedia](https://en.wikipedia.org/wiki/Control_flow)
-
-let's redo our `molecular_wt` function to throw an informative error when we pass a molecule to it whose atoms are not present in our `atomic_mass` dictionary.
+> a control flow statement is a statement, the execution of which results in a choice being made as to which of two or more paths a computer program will follow - [Wikipedia](https://en.wikipedia.org/wiki/Control_flow)
 "
 
 # ╔═╡ 82eb1752-fd31-11ea-17be-11666cb6e2e8
@@ -439,7 +437,7 @@ md"### mutable vs immutable"
 # ╠═8c73923c-fd2e-11ea-2520-1736af901c1f
 # ╠═0485bc6e-fd2f-11ea-36c9-05455f0b59e3
 # ╠═0dacb54c-fd2f-11ea-05ff-4df8be2ef053
-# ╠═f621b84c-fd30-11ea-04e2-431ca045916f
+# ╟─f621b84c-fd30-11ea-04e2-431ca045916f
 # ╟─0e0a8cba-fd31-11ea-26ed-2d27f95f54ff
 # ╠═82eb1752-fd31-11ea-17be-11666cb6e2e8
 # ╠═9ff8ba12-fd33-11ea-2eca-0fe897359d25
