@@ -231,12 +231,12 @@ end
 z[1:4]
 
 # ╔═╡ 185775c2-fd28-11ea-03b1-a50001c813db
-z[4:end]
+z[3:end]
 
 # ╔═╡ 259be740-fd28-11ea-3cce-0959719ea489
 begin
 	# by booleans
-	i_want = [true, false, true, false, false] # an Array{Bool}
+	i_want = [true, false, false, true, false] # an Array{Bool}
 	z[i_want]
 end
 
@@ -443,9 +443,7 @@ molecular_wt(3.0)
 
 # ╔═╡ 0e0a8cba-fd31-11ea-26ed-2d27f95f54ff
 md"### control flow
-> a control flow statement is a statement, the execution of which results in a choice being made as to which of two or more paths a computer program wil follow - [Wikipedia](https://en.wikipedia.org/wiki/Control_flow)
-
-let's redo our `molecular_wt` function to throw an informative error when we pass a molecule to it whose atoms are not present in our `atomic_mass` dictionary.
+> a control flow statement is a statement, the execution of which results in a choice being made as to which of two or more paths a computer program will follow - [Wikipedia](https://en.wikipedia.org/wiki/Control_flow)
 "
 
 # ╔═╡ 82eb1752-fd31-11ea-17be-11666cb6e2e8
