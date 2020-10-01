@@ -36,6 +36,11 @@ city = ["Corvallis", "Portland", "Eugene"]
 # ╔═╡ bb7f6bbe-033c-11eb-0180-b7dcc731d8ed
 population = [57961, 647805, 168916]
 
+# ╔═╡ 2071b5b6-038f-11eb-182d-f392b2198f2e
+# df_cities = DataFrame(city=city, population=population)
+df_cities = DataFrame(city=["Corvallis", "Portland", "Eugene"],
+	                  population=[57961, 647805, 168916])
+
 # ╔═╡ bc58ac1c-033c-11eb-2698-f5fc4c20b8ce
 md"#### append rows to a `DataFrame`
 
@@ -47,7 +52,10 @@ _approach 1_: think of rows of a `DataFrame` as an `Array`.
 "
 
 # ╔═╡ d172a490-033c-11eb-157e-6b95587099dd
-
+begin
+	new_row = ["Bend", 94520]
+	push!(df_cities, new_row)
+end
 
 # ╔═╡ 78b1f924-033d-11eb-2937-ff9634f5aa9a
 md"
@@ -55,7 +63,10 @@ _approach 2_: think of rows of a `DataFrame` as a `Dict`ionary.
 "
 
 # ╔═╡ 4c407c9a-0353-11eb-0618-955711917f54
-
+begin
+	second_new_row = Dict(:population => 122324, :city => "Berkeley")
+	push!(df_cities, second_new_row)
+end
 
 # ╔═╡ 5e293c82-033d-11eb-3984-7164bf9a351d
 md"#### append columns to a `DataFrame`
@@ -69,7 +80,14 @@ annual rainfall [inches]:
 "
 
 # ╔═╡ a5e9fc00-0353-11eb-1443-63b1c2edab7c
-
+begin
+	# (1) treat it like an array, except columns are called by Symbol's, not Int's
+	df_cities[:, :rainfal] = [51.0, 43.0, 47.0, 12.0, 25.0]
+	
+	# (2) allows you to insert a column at specified location
+	insertcols!(df_cities, 2, state=["OR", "OR", "OR", "OR", "CA"])
+	df_cities
+end
 
 # ╔═╡ a67b30b0-0353-11eb-2d2f-871d7a5ffd36
 md"
@@ -77,7 +95,7 @@ md"
 "
 
 # ╔═╡ 6249187e-035a-11eb-2f6a-d3318cf2a996
-
+size(df_cities) # (# rows, # cols)
 
 # ╔═╡ a3421e44-035e-11eb-3cf7-c70142f0591d
 md"
@@ -85,13 +103,22 @@ md"
 "
 
 # ╔═╡ a9d20a30-035e-11eb-14f4-ddf7cdaa34f6
-
+rename!(df_cities, :rainfal => :rainfall)
 
 # ╔═╡ 581bfc10-0362-11eb-1b29-cfd4320a5130
 md"#### deleting a row"
 
 # ╔═╡ 5d2707ac-0362-11eb-13e4-0d80fce58fea
+begin
+	# add a bogus row we'll want to remove
+	push!(df_cities, ["bogus", "blah", 0, 100.0]) 
+	
+	# add duplicate row we'll want to remove
+	push!(df_cities, ["Berkeley", "CA", 122324, 25.0]) 
+end
 
+# ╔═╡ b7fb0648-0390-11eb-2dc5-8b6935d2545c
+deleterows!(df_cities, 6)
 
 # ╔═╡ b8de77aa-0362-11eb-36d9-1d905442ca13
 md"
@@ -99,7 +126,7 @@ md"
 "
 
 # ╔═╡ cbf6250c-0362-11eb-365b-d327617f197e
-
+unique!(df_cities)
 
 # ╔═╡ 63716d2a-0362-11eb-3ce5-3b41d4bef04c
 md"
@@ -107,7 +134,14 @@ md"
 "
 
 # ╔═╡ 6d39deee-0362-11eb-3dbb-0f34eff54591
+begin
+	# add a bogus column
+	df_cities[:, :bogus_col] = [4, 3, 2, 3, 3]
+	df_cities
+end
 
+# ╔═╡ 5931d59e-0391-11eb-078b-ddb0bcaf6521
+deletecols!(df_cities, :bogus_col)
 
 # ╔═╡ 630b0e48-035a-11eb-15a4-a312e6941407
 md"#### what are the column names in the `DataFrame`?
@@ -117,7 +151,10 @@ if you have a fancy `String` you want to convert into a `Symbol`, `Symbol(\"avg 
 "
 
 # ╔═╡ d5b7f084-035a-11eb-32ef-6d645b8e0a6e
+names(df_cities)
 
+# ╔═╡ 9003f068-0391-11eb-2806-a76e99deefaa
+Symbol("avg salary (USD)")
 
 # ╔═╡ d663dd98-035a-11eb-156f-ff237a3944b6
 md"
@@ -125,7 +162,11 @@ md"
 "
 
 # ╔═╡ 360eb67a-035b-11eb-2ab3-85adb264a387
-
+for row in eachrow(df_cities)
+	# inside here, row is a ditionary. keys: column names.
+	print("city: ", row[:city])
+	println(" has a population of ", row[:population])
+end
 
 # ╔═╡ 5d7208d4-035b-11eb-00ef-cd70b6cb79d3
 md"
@@ -141,7 +182,7 @@ _approach 1_: treat the `DataFrame` like a 2D array
 "
 
 # ╔═╡ 8d4f4ede-035b-11eb-2337-7bdb844389ae
-
+df_cities[:, :population]
 
 # ╔═╡ 65353008-035b-11eb-261f-fffc23ec79a7
 md"
@@ -149,7 +190,7 @@ _approach 2_: treat the `DataFrame` like a `struct`
 "
 
 # ╔═╡ 9b569b7c-035b-11eb-2d27-cd4458bbbc02
-
+df_cities.population
 
 # ╔═╡ 7daa87e6-035b-11eb-3bb8-ff1bdd95714c
 md"
@@ -157,7 +198,7 @@ md"
 "
 
 # ╔═╡ f735e3ee-035b-11eb-33d1-755a1a9dc0a7
-
+df_cities[2, :]
 
 # ╔═╡ 1821e936-035c-11eb-0cb1-014241a2599e
 md"
@@ -165,14 +206,14 @@ md"
 "
 
 # ╔═╡ 1ad35930-035c-11eb-165d-2d70f7b07713
-
+df_cities[2, :population]
 
 # ╔═╡ 22623c72-035c-11eb-20f1-233b92ef16f9
 md"
 ##### ... combination of rows/columns"
 
 # ╔═╡ 35c1b9a8-035c-11eb-05f6-67e7bd5ef6e3
-
+df_cities[1:3, [:city, :state]]
 
 # ╔═╡ 9e01dd3a-0362-11eb-3d19-392ec2d06bd6
 md"
@@ -180,7 +221,7 @@ md"
 "
 
 # ╔═╡ a6f99cc8-0362-11eb-1801-2dd5fa96efe1
-
+unique(df_cities[:, :state])
 
 # ╔═╡ 366557f2-035c-11eb-31ce-9308dd49ce0c
 md"#### querying a `DataFrame`
@@ -191,7 +232,7 @@ _approach 1_: much like `Array` slicing, using an `Array` of bits
 "
 
 # ╔═╡ 93ffa426-035c-11eb-0ae3-1b9d95676c9b
-
+df_cities[df_cities[:, :city] .== "Corvallis", :]
 
 # ╔═╡ 26ca5a26-035d-11eb-380f-5b62049bd5a1
 md"_approach 2_: via the `filter` function.
@@ -200,17 +241,20 @@ md"_approach 2_: via the `filter` function.
 * there is also a `filter!` function that will remove these rows from the dataframe instead of returning a copy with the relevant rows removed
 "
 
+# ╔═╡ 5abb815e-0392-11eb-3576-a7e39e8ac6af
+filter(row -> row[:city] == "Corvallis", df_cities)
+
 # ╔═╡ 6ca4c6a8-035d-11eb-158c-3380a0cafdaa
 md"**example 2**: query all cities (rows) where the population is less than 500,000"
 
 # ╔═╡ 7dad5c94-035d-11eb-1f7b-2fedd834efaa
-
+filter(row -> row[:population] < 500000, df_cities)
 
 # ╔═╡ 7e54ed24-035d-11eb-19e2-4986b3cfcab4
 md"**example 3**: query all cities in the state of Oregon"
 
 # ╔═╡ 9879f190-035d-11eb-07c6-55453426c704
-
+filter(row -> row[:state] == "OR", df_cities)
 
 # ╔═╡ 9926bdbc-035d-11eb-1824-438e97d78ab9
 md"#### sorting
@@ -219,7 +263,7 @@ e.g. permute rows so that cities are listed by `:population` in reverse (`rev`) 
 "
 
 # ╔═╡ ab918a54-035d-11eb-27ae-2d70b27460ac
-
+sort!(df_cities, :population, rev=true)
 
 # ╔═╡ 9ed15498-035d-11eb-1369-53ae1eac0a27
 md"
@@ -231,7 +275,17 @@ e.g., group the cities (rows) in `df_cities` by state.
 "
 
 # ╔═╡ c1526020-035d-11eb-2d8a-d131aa445738
+gb_state = groupby(df_cities, :state)
 
+# ╔═╡ e80a4a9a-0392-11eb-2d35-09bb527d7a29
+for df_by_state in gb_state
+	# to which state does this group correpond?
+	this_state = df_by_state[1, :state]
+	
+	avg_rainfall_in_this_state = mean(df_by_state[:, :rainfall])
+	
+	println("average rainfall in ", this_state, " is ", avg_rainfall_in_this_state)
+end
 
 # ╔═╡ 4dd5195c-035e-11eb-1991-3fd9e7bf5d25
 md"
@@ -246,7 +300,7 @@ e.g., group by state, take `mean` of the rainfall column. see [docs](https://jul
 "
 
 # ╔═╡ 03a59b6c-035f-11eb-0a39-79c770bf5544
-
+df_rain = by(df_cities, :state, avg_rainfall=:rainfall => mean)
 
 # ╔═╡ 90381bb4-035e-11eb-2d05-81df6049cc33
 md"
@@ -255,7 +309,7 @@ md"
 "
 
 # ╔═╡ 9966dfae-035e-11eb-1a5e-a51a17c37ed4
-
+aggregate(df_cities[:, [:population, :rainfall, :state]], :state, mean)
 
 # ╔═╡ 8226dc8e-0362-11eb-17bf-47cae0df2907
 md"#### write a `DataFrame` to a `.csv` file
@@ -266,7 +320,10 @@ CSV = comma separated value
 "
 
 # ╔═╡ 907832ea-0362-11eb-2132-a3abadd4b1ee
+CSV.write("rainfall.csv", df_rain)
 
+# ╔═╡ c711c3f8-0393-11eb-2fbc-77693069c73f
+run(`cat rainfall.csv`)
 
 # ╔═╡ 08e91b1c-035f-11eb-05d0-9fe60938a4e3
 md"#### read in a `.csv` file into a `DataFrame`
@@ -275,11 +332,11 @@ use the `CSV.jl` package.
 CSV = comma separated value
 "
 
+# ╔═╡ fdab541a-0393-11eb-0318-3390bd75a95d
+pwd() # present working directory to see where CSV looks for files
+
 # ╔═╡ 1c01557a-035f-11eb-37e8-e9497003725f
-
-
-# ╔═╡ 29b2e04e-035f-11eb-3b55-251cf85877c5
-
+df_incomes = CSV.read("incomes.csv")
 
 # ╔═╡ 4cf973b8-0361-11eb-1777-cf02396ba052
 md"
@@ -300,7 +357,7 @@ only keep rows where the city is common between the two `DataFrames`
 "
 
 # ╔═╡ 74379f7c-0361-11eb-0192-c59bca513893
-
+df_ij = join(df_cities, df_incomes, on=:city, kind=:inner)
 
 # ╔═╡ 80c12360-0361-11eb-3eb3-eddb35dac4a5
 md"
@@ -310,7 +367,7 @@ keep all rows, fill with `missing` values when an attribute is missing in either
 "
 
 # ╔═╡ 02bef8b2-0362-11eb-130f-f99cc7311f5a
-
+df_oj = join(df_cities, df_incomes, on=:city, kind=:outer)
 
 # ╔═╡ 098a5628-0362-11eb-33af-9fc2fbceddba
 md"#### missing values
@@ -318,25 +375,28 @@ Julia has a data type to efficiently handle missing values
 "
 
 # ╔═╡ 12deee64-0362-11eb-3612-ed369a623583
+missing
 
+# ╔═╡ 977c25ce-0394-11eb-0076-0955dcfe0ca1
+typeof(missing)
 
 # ╔═╡ 1e41218c-0362-11eb-2ae3-17339b033f7a
 md"columns with missing values are arrays of whatever type but `Union`'d with the `Missing` type"
 
 # ╔═╡ 25a8858c-0362-11eb-3405-95aeea8c1338
-
+typeof(df_oj[:, :state])
 
 # ╔═╡ 2fb25d0c-0362-11eb-16b3-b75f845f82a9
 md"remove all rows that have a missing attribute"
 
 # ╔═╡ 36ba914e-0362-11eb-0aa7-6fda9f1b4d02
-
+dropmissing(df_oj)
 
 # ╔═╡ 38ab5560-0362-11eb-15cb-4595de21d218
 md"remove all rows with a missing per capita income"
 
 # ╔═╡ 3edf858c-0362-11eb-3b47-5f53c1360718
-
+dropmissing(df_oj, :state)
 
 # ╔═╡ Cell order:
 # ╟─1b29c142-033b-11eb-1fcd-3167939de8d2
@@ -344,6 +404,7 @@ md"remove all rows with a missing per capita income"
 # ╟─31e25766-033c-11eb-3991-d55735f7977f
 # ╠═45806120-033c-11eb-359e-bfb9796dfee8
 # ╠═bb7f6bbe-033c-11eb-0180-b7dcc731d8ed
+# ╠═2071b5b6-038f-11eb-182d-f392b2198f2e
 # ╟─bc58ac1c-033c-11eb-2698-f5fc4c20b8ce
 # ╠═d172a490-033c-11eb-157e-6b95587099dd
 # ╟─78b1f924-033d-11eb-2937-ff9634f5aa9a
@@ -356,12 +417,15 @@ md"remove all rows with a missing per capita income"
 # ╠═a9d20a30-035e-11eb-14f4-ddf7cdaa34f6
 # ╟─581bfc10-0362-11eb-1b29-cfd4320a5130
 # ╠═5d2707ac-0362-11eb-13e4-0d80fce58fea
+# ╠═b7fb0648-0390-11eb-2dc5-8b6935d2545c
 # ╟─b8de77aa-0362-11eb-36d9-1d905442ca13
 # ╠═cbf6250c-0362-11eb-365b-d327617f197e
 # ╟─63716d2a-0362-11eb-3ce5-3b41d4bef04c
 # ╠═6d39deee-0362-11eb-3dbb-0f34eff54591
+# ╠═5931d59e-0391-11eb-078b-ddb0bcaf6521
 # ╟─630b0e48-035a-11eb-15a4-a312e6941407
 # ╠═d5b7f084-035a-11eb-32ef-6d645b8e0a6e
+# ╠═9003f068-0391-11eb-2806-a76e99deefaa
 # ╟─d663dd98-035a-11eb-156f-ff237a3944b6
 # ╠═360eb67a-035b-11eb-2ab3-85adb264a387
 # ╟─5d7208d4-035b-11eb-00ef-cd70b6cb79d3
@@ -379,6 +443,7 @@ md"remove all rows with a missing per capita income"
 # ╟─366557f2-035c-11eb-31ce-9308dd49ce0c
 # ╠═93ffa426-035c-11eb-0ae3-1b9d95676c9b
 # ╟─26ca5a26-035d-11eb-380f-5b62049bd5a1
+# ╠═5abb815e-0392-11eb-3576-a7e39e8ac6af
 # ╟─6ca4c6a8-035d-11eb-158c-3380a0cafdaa
 # ╠═7dad5c94-035d-11eb-1f7b-2fedd834efaa
 # ╟─7e54ed24-035d-11eb-19e2-4986b3cfcab4
@@ -387,21 +452,24 @@ md"remove all rows with a missing per capita income"
 # ╠═ab918a54-035d-11eb-27ae-2d70b27460ac
 # ╟─9ed15498-035d-11eb-1369-53ae1eac0a27
 # ╠═c1526020-035d-11eb-2d8a-d131aa445738
+# ╠═e80a4a9a-0392-11eb-2d35-09bb527d7a29
 # ╟─4dd5195c-035e-11eb-1991-3fd9e7bf5d25
 # ╠═03a59b6c-035f-11eb-0a39-79c770bf5544
 # ╟─90381bb4-035e-11eb-2d05-81df6049cc33
 # ╠═9966dfae-035e-11eb-1a5e-a51a17c37ed4
 # ╟─8226dc8e-0362-11eb-17bf-47cae0df2907
 # ╠═907832ea-0362-11eb-2132-a3abadd4b1ee
-# ╠═08e91b1c-035f-11eb-05d0-9fe60938a4e3
+# ╠═c711c3f8-0393-11eb-2fbc-77693069c73f
+# ╟─08e91b1c-035f-11eb-05d0-9fe60938a4e3
+# ╠═fdab541a-0393-11eb-0318-3390bd75a95d
 # ╠═1c01557a-035f-11eb-37e8-e9497003725f
-# ╠═29b2e04e-035f-11eb-3b55-251cf85877c5
 # ╟─4cf973b8-0361-11eb-1777-cf02396ba052
 # ╠═74379f7c-0361-11eb-0192-c59bca513893
 # ╟─80c12360-0361-11eb-3eb3-eddb35dac4a5
 # ╠═02bef8b2-0362-11eb-130f-f99cc7311f5a
 # ╟─098a5628-0362-11eb-33af-9fc2fbceddba
 # ╠═12deee64-0362-11eb-3612-ed369a623583
+# ╠═977c25ce-0394-11eb-0076-0955dcfe0ca1
 # ╟─1e41218c-0362-11eb-2ae3-17339b033f7a
 # ╠═25a8858c-0362-11eb-3405-95aeea8c1338
 # ╟─2fb25d0c-0362-11eb-16b3-b75f845f82a9
