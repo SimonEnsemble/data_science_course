@@ -12,6 +12,14 @@ md"
 ## Monte Carlo simulation of Buffon's needle
 "
 
+# ╔═╡ f3ca3250-039c-11eb-0c7c-d7d56fcc2ca6
+begin
+	PyPlot.matplotlib.style.use("seaborn-colorblind")
+	
+	rcParams = PyPlot.PyDict(PyPlot.matplotlib."rcParams")
+	rcParams["font.size"] = 16
+end
+
 # ╔═╡ 0c9005be-0136-11eb-1ce4-4b7b26c374b6
 md"
 ### defining helpful data structures
@@ -115,7 +123,26 @@ first, let's toss a bunch of needles and keep track of them in an array.
 "
 
 # ╔═╡ d1e261fc-02d0-11eb-00e6-1594f53ab643
+begin
+	floor = Floor(2.0)
+	L = floor.ℓ / 2
+	nb_tosses = 125
+end
 
+# ╔═╡ 25e90a00-033f-11eb-3b33-678f9cfb5e6a
+needles = [toss_needle(L, floor) for 🌳 in 1:nb_tosses] # list comprehension
+
+# ╔═╡ a8701318-033f-11eb-2731-8798e51fb4c9
+# begin
+# 	needles = Needle[]
+# 	for t = 1:nb_tosses
+# 		push!(needles, toss_needle(L, floor))
+# 	end
+# 	needles
+# end
+
+# ╔═╡ c46bbb80-033f-11eb-1919-f10ad3e77a5a
+length(needles)
 
 # ╔═╡ d427544c-02d0-11eb-0a24-95e0cdcdef49
 md"
@@ -123,15 +150,84 @@ md"
 "
 
 # ╔═╡ 0cd6cfe6-02d1-11eb-2f6a-3ff63622e586
-
+begin
+	# if you wish to color the needles by whether or not they
+	#   cross a line
+	color_by_crossing = false
+	
+	figure()
+	xlabel(L"$x$")
+	ylabel(L"$y$")
+	# plot the lines on the floor
+	nb_lines = 6
+	for l = 1:nb_lines
+		axvline(x=(l-1) * floor.ℓ, color="k")
+	end
+	# plot the needles
+	dy = (nb_lines - 1) * floor.ℓ
+	for needle in needles
+		xs = [needle.x - needle.L / 2 * sin(needle.θ), 
+			  needle.x + needle.L / 2 * sin(needle.θ)]
+		ys = [needle.L / 2 * cos(needle.θ), 
+			  -needle.L / 2 * cos(needle.θ)] 
+		# add random offset for viz purposes
+		xs = xs .+ floor.ℓ * rand(0:nb_lines-2)
+		ys = ys .+ rand() * dy
+		if ! color_by_crossing || cross_line(needle, floor)
+			plot(xs, ys, color="C1")
+		else
+			plot(xs, ys, color="C2")
+		end
+	end
+	xlim([-L/2, (nb_lines - 1) * floor.ℓ + L/2])
+	ylim([-L/2, dy + L/2])
+	axis("off")
+	gca().set_aspect("equal")
+	savefig("needles.png", format="png", dpi=300)
+# 	title("Buffon's needle")
+	gcf()
+end
 
 # ╔═╡ 6a9c9648-02d0-11eb-15a3-571fee067d61
 md"
 #### visualize the state space of needles $(x, \theta)$
 "
 
-# ╔═╡ 0dde4f40-02d1-11eb-1522-859a2eda2762
-
+# ╔═╡ 60c473a6-042c-11eb-31e6-6dedb602e8f9
+begin
+	figure()
+	xlabel(L"$\theta$")
+	ylabel(L"$x$")
+	θ_range = range(0.0, π, length=100)
+	
+	# plot boundaries as lines
+	plot(θ_range, L/2 * sin.(θ_range), color="k")
+	plot(θ_range, floor.ℓ .- L/2 * sin.(θ_range), color="k")
+	hlines(0.0, 0.0, π, color="k", clip_on=false)
+	hlines(floor.ℓ, 0.0, π, color="k", clip_on=false)
+	vlines(0.0, 0.0, floor.ℓ, color="k", clip_on=false)
+	vlines(π, 0.0, floor.ℓ, color="k", clip_on=false)
+	
+	# fill regions with color
+	fill_between(θ_range, zeros(100), L/2 * sin.(θ_range), 
+		alpha=0.5, color="C0")
+	fill_between(θ_range, L/2 * sin.(θ_range), floor.ℓ .- L/2 * sin.(θ_range), 
+		alpha=0.5, color="C1")
+	fill_between(θ_range, floor.ℓ .- L/2 * sin.(θ_range), [floor.ℓ for i = 1:100], 
+		alpha=0.5, color="C0")
+	
+	# plot needles in state space
+	xs = [needle.x for needle in needles]
+	θs = [needle.θ for needle in needles]
+	colors = [cross_line(needle, floor) ? "C0" : "C1" for needle in needles]
+	scatter(θs, xs, color=colors, marker="x")
+	
+	xlim([0, π])
+	xticks([0, π/2, π], [L"$0$", L"$\pi/2$", L"$\pi$"])
+	ylim([0, floor.ℓ])
+	yticks([0, floor.ℓ], [L"$0$", L"$\ell$"])
+	gcf()
+end
 
 # ╔═╡ 4217183e-02d1-11eb-0da6-61fa776418c9
 md"
@@ -141,7 +237,7 @@ see [here](https://en.wikipedia.org/wiki/Buffon%27s_needle_problem).
 
 $p = \frac{2L}{\pi \ell}$
 
-this is a cool way to compute $\pi$ 😎
+if $L=\ell/2\implies$ this is a cool way to compute $\pi$ (well, $\pi^{-1}$) 😎
 "
 
 # ╔═╡ e654733c-02d0-11eb-16b2-092f5bae0883
@@ -149,15 +245,44 @@ md"
 ### how many tosses do we need for a reliable estimate?
 "
 
-# ╔═╡ 0f2f6ea6-02d1-11eb-2464-c3d12a81a15a
+# ╔═╡ c43ba85e-043a-11eb-1b3c-63e6aa51fdd4
+
+
+# ╔═╡ 59c92812-045f-11eb-315f-796411822194
 
 
 # ╔═╡ d28f1324-02d1-11eb-3224-751c95995830
 
 
+# ╔═╡ 60c53630-045f-11eb-3597-77c55aa98bca
+begin
+	x = [1, 2, 3]
+	y = x .^ 2
+	
+	yerr = rand(2, 3)
+end
+
+# ╔═╡ e92b6076-045a-11eb-232d-5d09ad2f5b76
+begin
+	# https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.errorbar.html#matplotlib.pyplot.errorbar
+	figure()
+	errorbar(x, y, fmt="o", yerr=yerr, capsize=5)
+	gcf()
+end
+
+# ╔═╡ 5ca13928-045f-11eb-2af6-914d599250e6
+
+
+# ╔═╡ 3b01794e-045b-11eb-3ee5-cdebb0f4d285
+
+
+# ╔═╡ 5e8a632c-045f-11eb-1d15-9567e04999fa
+
+
 # ╔═╡ Cell order:
 # ╟─84bbb724-ff52-11ea-10f2-6113eee6b3ae
 # ╠═f4c4e3c2-0134-11eb-3801-9b34e38a05d4
+# ╠═f3ca3250-039c-11eb-0c7c-d7d56fcc2ca6
 # ╟─0c9005be-0136-11eb-1ce4-4b7b26c374b6
 # ╠═b5dec972-ff52-11ea-01a3-dfcaeade188d
 # ╟─37258de2-0136-11eb-00b1-f186cf54efbb
@@ -176,11 +301,20 @@ md"
 # ╠═2fece28c-02d0-11eb-1427-b7c56e640a76
 # ╟─4b9088f4-02d0-11eb-27da-87dcda0ae70c
 # ╠═d1e261fc-02d0-11eb-00e6-1594f53ab643
+# ╠═25e90a00-033f-11eb-3b33-678f9cfb5e6a
+# ╠═a8701318-033f-11eb-2731-8798e51fb4c9
+# ╠═c46bbb80-033f-11eb-1919-f10ad3e77a5a
 # ╟─d427544c-02d0-11eb-0a24-95e0cdcdef49
 # ╠═0cd6cfe6-02d1-11eb-2f6a-3ff63622e586
 # ╟─6a9c9648-02d0-11eb-15a3-571fee067d61
-# ╠═0dde4f40-02d1-11eb-1522-859a2eda2762
+# ╠═60c473a6-042c-11eb-31e6-6dedb602e8f9
 # ╟─4217183e-02d1-11eb-0da6-61fa776418c9
 # ╟─e654733c-02d0-11eb-16b2-092f5bae0883
-# ╠═0f2f6ea6-02d1-11eb-2464-c3d12a81a15a
+# ╠═c43ba85e-043a-11eb-1b3c-63e6aa51fdd4
+# ╠═59c92812-045f-11eb-315f-796411822194
 # ╠═d28f1324-02d1-11eb-3224-751c95995830
+# ╠═60c53630-045f-11eb-3597-77c55aa98bca
+# ╠═e92b6076-045a-11eb-232d-5d09ad2f5b76
+# ╠═5ca13928-045f-11eb-2af6-914d599250e6
+# ╠═3b01794e-045b-11eb-3ee5-cdebb0f4d285
+# ╠═5e8a632c-045f-11eb-1d15-9567e04999fa
