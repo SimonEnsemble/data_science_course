@@ -14,8 +14,11 @@ md"
 
 # ╔═╡ f3ca3250-039c-11eb-0c7c-d7d56fcc2ca6
 begin
+	# change matplotlib style. choose one here:
+	#   https://matplotlib.org/3.1.1/gallery/style_sheets/style_sheets_reference.html
 	PyPlot.matplotlib.style.use("seaborn-colorblind")
 	
+	# make the font bigger
 	rcParams = PyPlot.PyDict(PyPlot.matplotlib."rcParams")
 	rcParams["font.size"] = 16
 end
@@ -240,44 +243,110 @@ $p = \frac{2L}{\pi \ell}$
 if $L=\ell/2\implies$ this is a cool way to compute $\pi$ (well, $\pi^{-1}$) 😎
 "
 
-# ╔═╡ e654733c-02d0-11eb-16b2-092f5bae0883
-md"
-### how many tosses do we need for a reliable estimate?
-"
+# ╔═╡ 00b77514-04d2-11eb-1372-036aeab58188
+"""
+	p = exact_p(floor, L)
 
-# ╔═╡ c43ba85e-043a-11eb-1b3c-63e6aa51fdd4
+compute the exact probability that a needle of length `L` crosses a `floor`.
+[yes, we can derive an analytical solution to the Buffon's needle problem!]
 
-
-# ╔═╡ 59c92812-045f-11eb-315f-796411822194
-
-
-# ╔═╡ d28f1324-02d1-11eb-3224-751c95995830
-
-
-# ╔═╡ 60c53630-045f-11eb-3597-77c55aa98bca
-begin
-	x = [1, 2, 3]
-	y = x .^ 2
-	
-	yerr = rand(2, 3)
+# arguments
+* `floor::Floor`: a floor with parallel lines
+* `L::Float64`: the length of the needle.
+"""
+function exact_p(floor::Floor, L::Float64)
+	return 2 * L / (π * floor.ℓ)
 end
 
-# ╔═╡ e92b6076-045a-11eb-232d-5d09ad2f5b76
+# ╔═╡ 26a99aa4-04d2-11eb-1ab0-313436c05652
+exact_p(floor, L)
+
+# ╔═╡ 2442d8ac-04d2-11eb-2c27-17c926f22e4a
+estimate_prob_needle_crosses_line(10000000, floor, L)
+
+# ╔═╡ 5f088f6e-04f4-11eb-0d9f-fb83831fab66
+md"check that our simulation recovers the exact probability.
+
+if not, we have a 🐛!
+"
+
+# ╔═╡ 8b85e13a-04d2-11eb-3105-cd3ecabd1a10
+isapprox(exact_p(floor, L), 
+		 estimate_prob_needle_crosses_line(100000000, floor, L),
+		 atol=1e-3)
+
+# ╔═╡ e654733c-02d0-11eb-16b2-092f5bae0883
+md"
+### how does the estimate of the probability of a needle cross depend on the number of tosses?
+"
+
+# ╔═╡ a72dbd00-04f4-11eb-117d-35b47f75b1cf
+nb_tosses_range = [10, 50, 100, 500, 1000, 5000, 10000, 50000, 100000]
+
+# ╔═╡ e221a23c-04f4-11eb-118e-2d6bf6a135d7
+md"first, a warm-up problem.
+plot the estimate of the probability against the number of tosses used to estimate it.
+this is going to be noisy and change significantly each time we run, when the number of tosses is small. (not ideal, but a good warm-up problem)."
+
+# ╔═╡ 7daafaea-04f4-11eb-194b-17706203fb09
 begin
-	# https://matplotlib.org/3.1.1/api/_as_gen/matplotlib.pyplot.errorbar.html#matplotlib.pyplot.errorbar
+	p_ests = zeros(length(nb_tosses_range))
+	for (i, nb_tosses) in enumerate(nb_tosses_range)
+		p_ests[i] = estimate_prob_needle_crosses_line(nb_tosses, floor, L)
+	end
+end
+
+# ╔═╡ b24b2042-04f4-11eb-1292-3918f46dd9d1
+begin
 	figure()
-	errorbar(x, y, fmt="o", yerr=yerr, capsize=5)
+	scatter(nb_tosses_range, p_ests, color="C5")
+	xlabel("# tosses")
+	ylabel(L"estimate of $p$")
+	axhline(y=exact_p(floor, L), linestyle="--", color="gray")
+	xscale("log")
 	gcf()
 end
 
-# ╔═╡ 5ca13928-045f-11eb-2af6-914d599250e6
+# ╔═╡ 0ff169d6-04f5-11eb-07b4-2535ab742442
+md"
+now, for a fixed # of tosses, let's run `nb_sims=1000` simulations of needle tossing to see how the estimate varies with the number of tosses.
+* plot the average among the simulations as a dot.
+* plot the middle 90% of the estimates within error bars.
+"
 
+# ╔═╡ c43ba85e-043a-11eb-1b3c-63e6aa51fdd4
+begin
+	nb_sims = 5000
+	# store average estimates here
+	avg_p_ests = zeros(length(nb_tosses_range))
+	# store length of error bars here.
+	yerr = zeros(2, length(nb_tosses_range))
+	# loop over different # tosses
+	for (i, nb_tosses) in enumerate(nb_tosses_range)
+		# run nb_sims simulations of needle tossing
+		p_ests = zeros(nb_sims)
+		for s = 1:nb_sims
+			p_ests[s] = estimate_prob_needle_crosses_line(nb_tosses, floor, L)
+		end
+		# compute average estimate among the simulations
+		avg_p_ests[i] = mean(p_ests)
+		# get 5th, 95th percentiles and compute length of error bars
+		yerr[1, i] = percentile(p_ests, 95.0) - avg_p_ests[i]
+		yerr[2, i] = avg_p_ests[i] - percentile(p_ests, 5.0)
+	end
+end
 
-# ╔═╡ 3b01794e-045b-11eb-3ee5-cdebb0f4d285
-
-
-# ╔═╡ 5e8a632c-045f-11eb-1d15-9567e04999fa
-
+# ╔═╡ d44b7674-04f4-11eb-0089-0feabade739c
+begin
+	figure()
+	errorbar(nb_tosses_range, avg_p_ests, 
+		yerr=yerr, color="C5", lw=2, fmt="o", capsize=5)
+	xlabel("# tosses")
+	ylabel(L"estimate of $p$")
+	axhline(y=exact_p(floor, L), linestyle="--", color="gray")
+	xscale("log")
+	gcf()
+end
 
 # ╔═╡ Cell order:
 # ╟─84bbb724-ff52-11ea-10f2-6113eee6b3ae
@@ -309,12 +378,16 @@ end
 # ╟─6a9c9648-02d0-11eb-15a3-571fee067d61
 # ╠═60c473a6-042c-11eb-31e6-6dedb602e8f9
 # ╟─4217183e-02d1-11eb-0da6-61fa776418c9
+# ╠═00b77514-04d2-11eb-1372-036aeab58188
+# ╠═26a99aa4-04d2-11eb-1ab0-313436c05652
+# ╠═2442d8ac-04d2-11eb-2c27-17c926f22e4a
+# ╟─5f088f6e-04f4-11eb-0d9f-fb83831fab66
+# ╠═8b85e13a-04d2-11eb-3105-cd3ecabd1a10
 # ╟─e654733c-02d0-11eb-16b2-092f5bae0883
+# ╠═a72dbd00-04f4-11eb-117d-35b47f75b1cf
+# ╟─e221a23c-04f4-11eb-118e-2d6bf6a135d7
+# ╠═7daafaea-04f4-11eb-194b-17706203fb09
+# ╠═b24b2042-04f4-11eb-1292-3918f46dd9d1
+# ╟─0ff169d6-04f5-11eb-07b4-2535ab742442
 # ╠═c43ba85e-043a-11eb-1b3c-63e6aa51fdd4
-# ╠═59c92812-045f-11eb-315f-796411822194
-# ╠═d28f1324-02d1-11eb-3224-751c95995830
-# ╠═60c53630-045f-11eb-3597-77c55aa98bca
-# ╠═e92b6076-045a-11eb-232d-5d09ad2f5b76
-# ╠═5ca13928-045f-11eb-2af6-914d599250e6
-# ╠═3b01794e-045b-11eb-3ee5-cdebb0f4d285
-# ╠═5e8a632c-045f-11eb-1d15-9567e04999fa
+# ╠═d44b7674-04f4-11eb-0089-0feabade739c
