@@ -13,7 +13,7 @@ student_name = "xxx" # write your name here and run the cell
 # ╔═╡ ecc0cb6c-027e-11eb-224b-81b62dbdd22a
 md"
 # CHE 599 hw 1
-_version 1_
+_version 2_
 
 Fall 2020
 
@@ -46,7 +46,7 @@ this exercise has a strong connection with molecular simulation, since the trees
 "
 
 # ╔═╡ 48075776-028f-11eb-0fd4-370dff3b0f8d
-md"1. define `R` as a variable that we will use in this problem, given that all pairs of trees must be further than a distance `R=5.0` apart."
+md"1. define `R` as a variable that we will use in this problem, given that no two trees can be planted a distance less than 10.0 apart."
 
 # ╔═╡ 67f43268-028f-11eb-2e5e-8faa100a99c9
 
