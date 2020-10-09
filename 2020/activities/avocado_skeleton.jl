@@ -1,5 +1,5 @@
 ### A Pluto.jl notebook ###
-# v0.12.0
+# v0.11.14
 
 using Markdown
 using InteractiveUtils
@@ -33,10 +33,7 @@ hint: see the `header` keyword argument of `CSV.read` [docs](https://juliadata.g
 "
 
 # ╔═╡ f7107c7a-0534-11eb-27fa-6ba9021843c1
-begin
-	df = CSV.read("avocado.csv", header=2, copycols=true)
-	head(df)
-end
+
 
 # ╔═╡ 0689eb44-0535-11eb-314d-fb8fc1a49a6f
 md"
@@ -44,7 +41,7 @@ how many entries of the price are `missing`? see `ismissing` [docs](https://docs
 "
 
 # ╔═╡ 0689c8b2-0535-11eb-148c-b748ef369b8e
-sum(ismissing.(df[:, :price]))
+
 
 # ╔═╡ cca7c0ac-0536-11eb-018d-25bb8609bddc
 md"
@@ -56,10 +53,7 @@ when it works, confirm that you see fewer rows, since some were dropped.
 "
 
 # ╔═╡ 0686e908-0535-11eb-07c7-4310aab61b5a
-begin
-	dropmissing!(df)
-	head(df)
-end
+
 
 # ╔═╡ c11b81fe-06a0-11eb-1489-377cfeccc438
 md"
@@ -67,7 +61,7 @@ how many different regions are represented in this data set?
 "
 
 # ╔═╡ cf2b51ca-06a0-11eb-2346-dbdd82bdb979
-length(unique(df[:, :region]))
+
 
 # ╔═╡ da06fe8c-06a0-11eb-1f3b-97bfe55e78e4
 md"
@@ -78,10 +72,10 @@ what is the earliest and latest date that the price of an avocado was recorded i
 "
 
 # ╔═╡ 14516294-06a1-11eb-2f89-9f00bf7acb17
-minimum(df[:, :date])
+
 
 # ╔═╡ 1a0aa5f6-06a1-11eb-1dfd-bfb6cd66ce86
-maximum(df[:, :date])
+
 
 # ╔═╡ cd601dd2-0536-11eb-26cf-739a3448db57
 md"
@@ -92,7 +86,7 @@ what is the mean price (over time) of an avocado in Portland?
 "
 
 # ╔═╡ fe2ab4ee-0537-11eb-0825-97af730ff5e8
-mean(filter(row -> row[:region] .== "Portland", df)[:, :price])
+
 
 # ╔═╡ 11096ad8-066e-11eb-0334-0705e2e69a79
 md"
@@ -100,7 +94,10 @@ on what day was the price of an avocado the cheapest in Boston?
 "
 
 # ╔═╡ 5b0bcedc-066e-11eb-1236-f9131e77b5be
-sort(filter(row -> row[:region] .== "Boston", df), :price)[1, :]
+
+
+# ╔═╡ 3c2be120-066e-11eb-2890-a152fbe917d4
+
 
 # ╔═╡ 72748576-066d-11eb-2a6e-570a127326ee
 md"
@@ -114,7 +111,7 @@ md"
 "
 
 # ╔═╡ 91429854-066d-11eb-21d4-dbeb4d8995cd
-head(sort(by(df, :region, :price=>mean), :price_mean, rev=true), 5)
+
 
 # ╔═╡ d7a23b16-066e-11eb-34ed-1fcc91b19476
 md"
@@ -122,7 +119,7 @@ find the unique values in the `type` column, so we know what types of avocadoes 
 "
 
 # ╔═╡ e4f3e4b8-066e-11eb-37f8-750ccb419219
-unique(df[:, :type])
+
 
 # ╔═╡ 6dc2f26e-066e-11eb-0f64-ffa9c9b30045
 md"
@@ -135,22 +132,7 @@ show two histograms on top of each other with transparency (pass `alpha=0.3` to 
 "
 
 # ╔═╡ 0d19344a-066f-11eb-2c01-e75389d98097
-begin
-	df_portland = filter(row -> row[:region] == "Portland", df)
-	my_bins = range(0.0, 3.0, length=25)
-	
-	figure()
-	xlabel("price")
-	
-	ylabel("# days")
-	for df_by_type in groupby(df_portland, :type)
-		avocado_type = df_by_type[1, :type]
-		hist(df_by_type[:, :price], label=avocado_type, alpha=0.3, bins=my_bins)
-	end
-	xlim(xmin=0.0)
-	legend()
-	gcf()
-end
+
 
 # ╔═╡ e8b8970e-06a2-11eb-20d1-db6602f080e1
 md"
@@ -158,15 +140,7 @@ depict the same information (difference in distribution of price among organic v
 "
 
 # ╔═╡ 386161b8-06a2-11eb-0f5e-892a482e5f11
-begin
-	figure()
-	boxplot([df_by_type[:, :price] for df_by_type in groupby(df_portland, :type)])
-	xticks(1:2, [df_by_type[1, :type] for df_by_type in groupby(df_portland, :type)])
-	ylim(ymin=0.0)
-	xlabel("avocado type")
-	ylabel("price")
-	gcf()
-end
+
 
 # ╔═╡ 5833bda4-0697-11eb-136d-a90eb4de53db
 md"
@@ -177,8 +151,7 @@ list the dates where organic avocadoes cost more than \$2.50 in Portland.
 "
 
 # ╔═╡ 76dc9a78-0697-11eb-39d4-95a788b221f6
-filter(row -> (row[:price] > 2.5) && (row[:type] == "organic"), 
-	df_portland)
+
 
 # ╔═╡ d3b84900-067d-11eb-18a2-c50b6b5f019a
 md"
@@ -189,32 +162,10 @@ for Portland, make a scatter plot of the price of an organic avocado vs. a conve
 "
 
 # ╔═╡ 216f7492-067f-11eb-2efa-c777fca94a4d
-begin
-	df_organic =      filter(row -> row[:type] == "organic"     , df_portland)
-	rename!(df_organic, :price => :organic_price)
-	df_organic = df_organic[:, [:date, :organic_price]]
-	
-	df_conventional = filter(row -> row[:type] == "conventional", df_portland)
-	rename!(df_conventional, :price => :conventional_price)
-	df_conventional = df_conventional[:, [:date, :conventional_price]]
-	
-	df_by_date = join(df_organic, df_conventional, on=:date)
-	head(df_by_date)
-end
+
 
 # ╔═╡ 55a842a2-0696-11eb-16d6-3b4cca494689
-begin
-	figure()
-	scatter(df_by_date[:, :conventional_price], df_by_date[:, :organic_price],
-		marker="x")
-	plot([0.0, 3.0], [0.0, 3.0], linestyle="--", color="gray")
-	xlabel("conventional price")
-	ylabel("organic price")
-	xlim([0, 3])
-	ylim([0, 3])
-	gca().set_aspect("equal", "box")
-	gcf()
-end
+
 
 # ╔═╡ fa4d187c-0699-11eb-213f-c99e5792d76f
 md"
@@ -237,25 +188,16 @@ month(Date(\"2015-12-27\")) # 12
 "
 
 # ╔═╡ 180646d6-069a-11eb-3a9a-21b52520f00b
-df_boise_organic = filter(row -> row[:type] == "organic" && row[:region] == "Boise",
-	                      df)
+
 
 # ╔═╡ 1dfc5f0c-069b-11eb-2ed4-977265072617
-df_boise_organic[:, :month] = month.(df_boise_organic[:, :date])
+
 
 # ╔═╡ 78a0d204-069a-11eb-1f74-33c19a23ced8
-df_boise_organic_month = by(df_boise_organic, :month, mean_price=:price => mean)
+
 
 # ╔═╡ a2b16918-069b-11eb-146b-35a1a096f9c5
-begin
-	figure()
-	ylabel("month")
-	xlabel("average avocado price, \$")
-	yticks(1:12, 
-		["Jan.", "Feb.", "Mar.", "Apr.", "May", "Jun.", "Jul.", "Aug.", "Sep.", "Oct.", "Nov.", "Dec."])
-	barh(df_boise_organic_month[:, :month], df_boise_organic_month[:, :mean_price])
-	gcf()
-end
+
 
 # ╔═╡ Cell order:
 # ╠═77fcc784-0534-11eb-03d4-1d4f9ccbfd83
@@ -276,6 +218,7 @@ end
 # ╠═fe2ab4ee-0537-11eb-0825-97af730ff5e8
 # ╟─11096ad8-066e-11eb-0334-0705e2e69a79
 # ╠═5b0bcedc-066e-11eb-1236-f9131e77b5be
+# ╠═3c2be120-066e-11eb-2890-a152fbe917d4
 # ╟─72748576-066d-11eb-2a6e-570a127326ee
 # ╟─d2a535ba-066d-11eb-32ef-ff10c48dffa7
 # ╠═91429854-066d-11eb-21d4-dbeb4d8995cd
