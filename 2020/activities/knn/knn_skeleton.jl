@@ -183,14 +183,14 @@ note the drastic difference in scales. this is not good for k-NN algo because we
 md"
 🐉 to achieve better performance in the k-NN, i.e. to obtain a more meaninful distance metric in feature space, do a Max-Min Normalization of each feature. that is:
 
-$$x_s = \frac{x - \min(x)}{\max(x) - \min(x)}$$
+$$x_n = \frac{x - \min(x)}{\max(x) - \min(x)}$$
 
-where $x_s$ is the normalized feature and $x$ is the original feature.
+where $x_n$ is the normalized feature and $x$ is the original feature.
 
 this normalization of the features will ensure that the value of each feature is in the interval $[0, 1]$.
 
 !!! important
-    standardize both the test and train data. for the standardization, use the min and max of the respective feature *in the training set*. the reason we must not use test data to do the standardization is that we must pretend we don't have the test data when we train the k-NN to give a faithful estimate of generalization error when we evaluate the k-NN model on the test data.
+    normalize both the test and train data. for the normalization, use the min and max of the respective feature *in the training set*. the reason we must not use test data to do the normalization is that we must pretend we don't have the test data when we train the k-NN to give a faithful estimate of generalization error when we evaluate the k-NN model on the test data.
 
 !!! hint
     create two new columns in each the test and train data frame for these normalized features. feel free to use `describe` again to make sure you normalized correctly.
@@ -203,8 +203,8 @@ this normalization of the features will ensure that the value of each feature is
 md"
 🐉 plot each tumor in the training set as a point in feature space. color each point according to the outcome. i.e. there should be two different colors, one for M, one for B. use your `outcome_to_color` dictionary!
 
-* x-axis = standardized max smoothess
-* y-axis = standardized mean texture
+* x-axis = normalized max smoothess
+* y-axis = normalized mean texture
 * include a legend that indicates which color is which outcome
 * `gca().set_aspect(\"equal\")` for equal aspect ratio
 * pass `facecolor=\"None\"` to `scatter` to make the points hollow; helps see the density when there are many points overlapping. 
@@ -229,7 +229,7 @@ see scikitlearn documentation for `KNeighborsClassifier` [here](https://scikit-l
 🐉 first, we need to get our data in a format that scikitlearn wants.
 write a function `df_to_X_y` that takes a data frame as input-- either your test or train data frame-- and whose last line is `X, y`. the `X` is your feature matrix and the `y` contains labels (0 = B, 1 = M).
 * let `n_tumors` be the number of rows in the data frame passed into the function
-* `X::Array{Float64, 2}` will be a `n_tumor` by 2 matrix. the first column will contain the standardized max smoothnesses, and the second column will contain the standardized mean texture.
+* `X::Array{Float64, 2}` will be a `n_tumor` by 2 matrix. the first column will contain the normalized max smoothnesses, and the second column will contain the normalized mean texture.
 * `y::Array{Float64, 1}` will be a length `n_tumor` one-dimensional array. entry $i$ of `y` will be 0 if tumor $i$ is B and $1$ if it is M.
 
 !!! hint
@@ -276,7 +276,7 @@ see [scikitlearn docs](https://scikit-learn.org/stable/modules/generated/sklearn
 md"
 🐉 fit a $k=2$-NN model to the training data.
 
-a new tumor comes along that is not in the training set, with a standardized max smoothness = 0.3 and a standardized mean texture = 0.5. note these standardizations were done using the min and max of the features in the training data.
+a new tumor comes along that is not in the training set, with a normalized max smoothness = 0.3 and a normalized mean texture = 0.5. note these normalizations were done using the min and max of the features in the training data.
 
 what does your k-NN predict for this point?
 
@@ -328,8 +328,8 @@ function draw_decision_boundary(knn_model)
 	contourf(x₁, x₂, knn_predictions, 
 		     alpha=0.4, levels, 
 		     colors=[outcome_to_color["B"], outcome_to_color["M"]])
-	xlabel("standardized max smoothess")
-	ylabel("standardized mean texture")
+	xlabel("normalized max smoothess")
+	ylabel("normalized mean texture")
 	gca().set_aspect("equal")
 	gcf()
 end
